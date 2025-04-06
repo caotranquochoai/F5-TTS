@@ -914,21 +914,15 @@ def calculate_train(
 
     if torch.cuda.is_available():
         gpu_count = torch.cuda.device_count()
-        total_memory = 0
-        for i in range(gpu_count):
-            gpu_properties = torch.cuda.get_device_properties(i)
-            total_memory += gpu_properties.total_memory / (1024**3)  # in GB
-    elif torch.xpu.is_available():
+        total_memory = sum(torch.cuda.get_device_properties(i).total_memory for i in range(gpu_count)) / (1024**3)
+    elif hasattr(torch, "xpu") and torch.xpu.is_available():
         gpu_count = torch.xpu.device_count()
-        total_memory = 0
-        for i in range(gpu_count):
-            gpu_properties = torch.xpu.get_device_properties(i)
-            total_memory += gpu_properties.total_memory / (1024**3)
+        total_memory = sum(torch.xpu.get_device_properties(i).total_memory for i in range(gpu_count)) / (1024**3)
     elif torch.backends.mps.is_available():
         gpu_count = 1
         total_memory = psutil.virtual_memory().available / (1024**3)
     else:
-    # Nếu không có GPU, ta đặt gpu_count = 1 và sử dụng bộ nhớ ảo (RAM)
+    # Nếu không có GPU, sử dụng bộ nhớ của hệ thống (RAM)
         gpu_count = 1
         total_memory = psutil.virtual_memory().available / (1024**3)
 
