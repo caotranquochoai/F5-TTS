@@ -912,23 +912,27 @@ def calculate_train(
     total_samples = len(duration_list)
     total_duration = sum(duration_list)
 
-    if torch.cuda.is_available():
-        gpu_count = torch.cuda.device_count()
-        total_memory = 0
-        for i in range(gpu_count):
-            gpu_properties = torch.cuda.get_device_properties(i)
-            total_memory += gpu_properties.total_memory / (1024**3)  # in GB
-    elif torch.xpu.is_available():
-        gpu_count = torch.xpu.device_count()
-        total_memory = 0
-        for i in range(gpu_count):
-            gpu_properties = torch.xpu.get_device_properties(i)
-            total_memory += gpu_properties.total_memory / (1024**3)
-    elif torch.backends.mps.is_available():
-        gpu_count = 1
-        total_memory = psutil.virtual_memory().available / (1024**3)
+if torch.cuda.is_available():
+    gpu_count = torch.cuda.device_count()
+    total_memory = 0
+    for i in range(gpu_count):
+        gpu_properties = torch.cuda.get_device_properties(i)
+        total_memory += gpu_properties.total_memory / (1024**3)  # in GB
+elif torch.xpu.is_available():
+    gpu_count = torch.xpu.device_count()
+    total_memory = 0
+    for i in range(gpu_count):
+        gpu_properties = torch.xpu.get_device_properties(i)
+        total_memory += gpu_properties.total_memory / (1024**3)
+elif torch.backends.mps.is_available():
+    gpu_count = 1
+    total_memory = psutil.virtual_memory().available / (1024**3)
+else:
+    # Nếu không có GPU, ta đặt gpu_count = 1 và sử dụng bộ nhớ ảo (RAM)
+    gpu_count = 1
+    total_memory = psutil.virtual_memory().available / (1024**3)
 
-    avg_gpu_memory = total_memory / gpu_count
+avg_gpu_memory = total_memory / gpu_count
 
     # rough estimate of batch size
     if batch_size_type == "frame":
