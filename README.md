@@ -34,7 +34,7 @@ conda activate f5-tts
 ### Install PyTorch with matched device
 
 <details>
-<summary>NVIDIA GPU</summary>
+<summary>NVIDIA GPU 0 0</summary>
 
 > ```bash
 > # Install pytorch with your CUDA version, e.g.
